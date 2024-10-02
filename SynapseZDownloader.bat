@@ -9,6 +9,35 @@ if %errorLevel% neq 0 (
     set "rightsStatus=Admin"
 )
 
+:: Check if the script has already been restarted with admin rights
+if "%rightsStatus%"=="Admin" (
+    echo Continuing as an administrator...
+) else (
+    :: Ask if the user wants to run this batch file as an admin
+    :askAdmin
+    cls  :: Clear the console
+    echo Rights status: [%rightsStatus%]
+    set /p adminInput="Do you want to run this batch file as an admin? [yes or no]: "
+
+    if /i "%adminInput%"=="yes" (
+        echo Restarting as administrator...
+        powershell -Command "Start-Process '%~f0' -Verb RunAs"
+        exit /b
+    ) else if /i "%adminInput%"=="y" (
+        echo Restarting as administrator...
+        powershell -Command "Start-Process '%~f0' -Verb RunAs"
+        exit /b
+    ) else if /i "%adminInput%"=="no" (
+        echo Continuing as a standard user...
+    ) else if /i "%adminInput%"=="n" (
+        echo Continuing as a standard user...
+    ) else (
+        cls  :: Clear the console again for invalid input
+        echo Invalid input. Please enter 'yes' or 'no'.
+        goto askAdmin  :: Repeat the question for admin prompt
+    )
+)
+
 :: Define variables
 set "url=https://synapsez.net/download"
 set "currentDir=%~dp0"  :: Gets the current directory of the batch file
@@ -28,8 +57,13 @@ cls  :: Clear the console
 echo Rights status: [%rightsStatus%]
 set /p downloadInput="Do you want to download Synapse Z.zip? [yes or no]: "
 
-if /i "%downloadInput%"=="y" (
+if /i "%downloadInput%"=="yes" (
     goto download
+) else if /i "%downloadInput%"=="y" (
+    goto download
+) else if /i "%downloadInput%"=="no" (
+    echo You chose not to download Synapse Z.zip.
+    exit /b  :: Exit without downloading
 ) else if /i "%downloadInput%"=="n" (
     echo You chose not to download Synapse Z.zip.
     exit /b  :: Exit without downloading
@@ -74,19 +108,23 @@ del "%newZipFile%"
 echo Deleted zip file: %newZipFile%
 
 :: Prompt user to run SynapseLauncher.exe or not
-:askRunAdmin
+:askRunLauncher
 cls  :: Clear the console
 echo Rights status: [%rightsStatus%]
 set /p runInput="Do you want to run SynapseLauncher.exe? [yes or no]: "
 
-if /i "%runInput%"=="y" (
+if /i "%runInput%"=="yes" (
     start "" "%currentDir%!randomFolderName!\SynapseLauncher.exe"
+) else if /i "%runInput%"=="y" (
+    start "" "%currentDir%!randomFolderName!\SynapseLauncher.exe"
+) else if /i "%runInput%"=="no" (
+    echo You chose not to run SynapseLauncher.exe.
 ) else if /i "%runInput%"=="n" (
     echo You chose not to run SynapseLauncher.exe.
 ) else (
     cls  :: Clear the console again for invalid input
     echo Invalid input. Please enter 'yes' or 'no'.
-    goto askRunAdmin  :: Repeat the question for running prompt
+    goto askRunLauncher  :: Repeat the question for running prompt
 )
 
 endlocal
